@@ -36,14 +36,17 @@ contract Ecommerce {
     }
 
     function buyProduct(uint256 _productId) public payable {
-        uint256 amount = msg.value;
-
         Product storage product = products[_productId];
+
+        uint256 amount = product.price;
 
         product.buyers.push(msg.sender);
         product.amountBought.push(amount);
 
         (bool sent,) = payable(product.owner).call{value: amount}("");
+        if (sent) {
+            product.stocks = product.stocks - 1;
+        }
     }
 
     function getBuyers(uint256 _productId) view public returns(address[] memory, uint256[] memory) {
@@ -60,5 +63,9 @@ contract Ecommerce {
         }
 
         return allProducts;
+    }
+
+    function getProduct(uint256 _productId) view public returns(Product memory) {
+        return products[_productId];
     }
 }
